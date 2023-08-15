@@ -18,7 +18,6 @@ const (
 )
 
 func main() {
-
 	e := echo.New()
 	userRepo, err := mongo2.NewUsersRepo(MongoDBUri, Database, Collection)
 	if err != nil {

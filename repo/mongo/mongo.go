@@ -72,6 +72,35 @@ func (u *usersRepo) GetByUserName(ctx context.Context, userName string) (*models
 	return &user, nil
 }
 
+func (u *usersRepo) GetAll(ctx context.Context) ([]models.User, error) {
+	var users []models.User
+	filter := bson.D{}
+	cur, err := u.collection.Find(ctx, filter)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	for cur.Next(ctx) {
+		var user models.User
+		err := cur.Decode(&user)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
+	cur.Close(ctx)
+
+	return users, nil
+}
+
 func (u *usersRepo) Close() error {
 	if err := u.mongoClient.Disconnect(context.Background()); err != nil {
 		return err
